@@ -15,6 +15,7 @@ DESC = '''Use a set of nuclear and mitochondrial reference sequences
 to identify NUMTs in a set of sequencing reads.'''
 
 def parse_args() -> argparse.ArgumentParser:
+    # 
     p = argparse.ArgumentParser(prog=PROG, description=DESC)
     p.add_argument('-m', '--mt-fasta', required=True,
                    help='(str) Path to mitochondrial reference FASTA')
@@ -23,23 +24,27 @@ def parse_args() -> argparse.ArgumentParser:
     p.add_argument('-r', '--reads-fastq', required=True,
                    help='(str) Path to sequencing reads FASTQ')
     # TODO: what should default K be?
-    p.add_argument('-k', '--kmer-len', required=False, type=int, default=17,
-                   help='(int) Length of k for generating query and reference k-mers  [default=17]')
+    k_len = 17
+    p.add_argument('-k', '--kmer-len', required=False, type=int, default=k_len,
+                   help=f'(int) Length of k for generating query and reference k-mers  [default={k_len}]')
     # TODO: what should min kmers be?
-    p.add_argument('-i', '--min-kmers', required=False, type=str, default=5,
-                   help='(int) Minimum of k-mers required to match two sequences  [default=5]')
+    min_k = 5
+    p.add_argument('-i', '--min-kmers', required=False, type=str, default=min_k,
+                   help=f'(int) Minimum of k-mers required to match two sequences  [default={min_k}]')
     p.add_argument('-o', '--outdir', required=False, type=str, default='.',
                    help='(str) Path to output directory')
     args = p.parse_args()
-
+    # Check inputs
     if not path.exists(args.mt_fasta):
-        sys.exit(f'Error: `{args.mt_fasta}`: Mt FASTA does not exist.')
+        sys.exit(f'Error: Mt FASTA ({args.mt_fasta}) does not exist.')
     if not path.exists(args.nuc_fasta):
-        sys.exit(f'Error: `{args.nuc_fasta}`: Nuclear FASTA does not exist.')
+        sys.exit(f'Error: Nuclear FASTA ({args.nuc_fasta}) does not exist.')
     if not path.exists(args.outdir):
-        sys.exit(f'Error: `{args.outdir}`: Output directory does not exist.')
-    # TODO: Checks for kmers
-
+        sys.exit(f'Error: Output directory ({args.outdir}) does not exist.')
+    if not args.kmer_len > 0:
+        sys.exit(f'Error: length of k ({args.kmer_len}) must be > 0.')
+    if not args.min_kmers >= 1:
+        sys.exit(f'Error: length of k ({args.min_kmers}) must be >= 1.')
     return args
 
 
